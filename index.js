@@ -105,6 +105,9 @@ io.on("connection", (socket) => {
 					chalk.magenta("\ue0b4"),
 			);
 
+			io.to(currentGame.player1).emit('revealPlay', currentGame.round.player2)
+			io.to(currentGame.player2).emit('revealPlay', currentGame.round.player1)
+
 			currentGame.round = {
 				player1: undefined,
 				player2: undefined
