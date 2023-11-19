@@ -106,7 +106,10 @@ io.on("connection", (socket) => {
 			);
 
 			io.to(currentGame.player1).emit('revealPlay', currentGame.round.player2)
+			io.to(currentGame.player1).emit('sendPlay', currentGame.round.player1)
 			io.to(currentGame.player2).emit('revealPlay', currentGame.round.player1)
+			io.to(currentGame.player2).emit('sendPlay', currentGame.round.player2)
+
 
 			currentGame.round = {
 				player1: undefined,
