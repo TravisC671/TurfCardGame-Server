@@ -20,6 +20,8 @@ io.on("connection", (socket) => {
 		if (currentGame == undefined) {
 			currentGame = new gameStateHandler(data.gameID);
 
+			console.log(currentGame.dealHand('player1'))
+
 			console.log(
 				chalk.cyan("╭ "),
 				chalk.hex("#1E1E2E").bgCyan("\ue0b0 created Game \ue0b2"),
@@ -68,6 +70,9 @@ io.on("connection", (socket) => {
 			console.log(chalk.cyan('│'))
 
 			io.sockets.in(data.gameID).emit("gameStart", {});
+
+			//send hands
+			
 		} else {
 			console.log(
 				chalk.cyan("├─╴"),
@@ -77,6 +82,8 @@ io.on("connection", (socket) => {
 					chalk.bold("refused, is full"),
 				),
 			);
+
+			socket.emit('refused', {})
 		}
 	});
 
@@ -90,6 +97,9 @@ io.on("connection", (socket) => {
 					chalk.yellow("\ue0b4"),
 			);
 			
+			//otherplayer
+			io.to(currentGame.otherPlayer(player)).emit('onlinePlayerCard', {})
+
 			//TODO check valid placement
 			let cardPlayed = {cardID: cardID, rotation:rotation, positionX:positionX, positionY:positionY}
 			currentGame.round[player] = cardPlayed
