@@ -1,6 +1,6 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { gameStateHandler } from "./gameStateHandler.js";
+import { gameStateHandler, playerEnum } from "./gameStateHandler.js";
 import chalk from "chalk";
 import figlet from "figlet";
 import gradient from "gradient-string";
@@ -13,14 +13,12 @@ const io = new Server(httpServer, {
 });
 
 //let currentGames = [];
-let currentGame;
+let currentGame: gameStateHandler;
 
 io.on("connection", (socket) => {
 	socket.on("joinRoom", (data) => {
 		if (currentGame == undefined) {
 			currentGame = new gameStateHandler(data.gameID);
-
-			console.log(currentGame.dealHand('player1'))
 
 			console.log(
 				chalk.cyan("╭ "),
@@ -89,24 +87,35 @@ io.on("connection", (socket) => {
 
 	socket.on("playCard", (cardID, rotation, positionX, positionY) => {
 		let player = currentGame.checkPlayer(socket.id)
-		if (player == "neither") return
-		if (currentGame.round[player] == undefined) {
+		if (player == playerEnum.notPlayer) return
+
+		let currentRound;
+
+		if (player == playerEnum.player1) currentRound = currentGame.currentRound.player1;
+		if (player == playerEnum.player2) currentRound = currentGame.currentRound.player2;
+
+		if (currentRound == undefined) {
 			console.log(
 				chalk.cyan("├─╴ "),
-					chalk.bgYellow.black.bold(` ${player} played a card`) +
+					chalk.bgYellow.black.bold(` player${player + 1} played a card`) +
 					chalk.yellow("\ue0b4"),
 			);
 			
 			//otherplayer
-			io.to(currentGame.otherPlayer(player)).emit('onlinePlayerCard', {})
+			let otherplayerSocketID = currentGame.otherPlayer(player)
+			if (otherplayerSocketID == undefined) return;
+			
+			io.to(otherplayerSocketID).emit('onlinePlayerCard', {})
 
 			//TODO check valid placement
 			let cardPlayed = {cardID: cardID, rotation:rotation, positionX:positionX, positionY:positionY}
-			currentGame.round[player] = cardPlayed
+			
+			if (player == playerEnum.player1) currentGame.currentRound.player1 = cardPlayed
+			if (player == playerEnum.player2) currentGame.currentRound.player2 = cardPlayed
 
 		}
 
-		if (currentGame.round['player1'] != undefined && currentGame.round['player2'] != undefined) {
+		if (currentGame.currentRound.player1 != undefined && currentGame.currentRound.player2 != undefined) {
 			console.log(chalk.cyan('│'))
 			console.log(
 				chalk.cyan("├─╴"),
@@ -115,13 +124,16 @@ io.on("connection", (socket) => {
 					chalk.magenta("\ue0b4"),
 			);
 
-			io.to(currentGame.player1).emit('revealPlay', currentGame.round.player2)
-			io.to(currentGame.player1).emit('sendPlay', currentGame.round.player1)
-			io.to(currentGame.player2).emit('revealPlay', currentGame.round.player1)
-			io.to(currentGame.player2).emit('sendPlay', currentGame.round.player2)
+			if (currentGame.player1SocketID == undefined) return
+			if (currentGame.player2SocketID == undefined) return
+
+			io.to(currentGame.player1SocketID).emit('revealPlay', currentGame.currentRound.player2)
+			io.to(currentGame.player1SocketID).emit('sendPlay', currentGame.currentRound.player1)
+			io.to(currentGame.player2SocketID).emit('revealPlay', currentGame.currentRound.player1)
+			io.to(currentGame.player2SocketID).emit('sendPlay', currentGame.currentRound.player2)
 
 
-			currentGame.round = {
+			currentGame.currentRound = {
 				player1: undefined,
 				player2: undefined
 			}
