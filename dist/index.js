@@ -24,6 +24,10 @@ io.on("connection", (socket) => {
         else if (!currentGame.isFull) {
             currentGame.addPlayer(socket.id);
             socket.join(data.gameID);
+            if (currentGame.player1SocketID == undefined)
+                return;
+            if (currentGame.player2SocketID == undefined)
+                return;
             console.log(chalk.cyan("├─╴"), chalk.blueBright(socket.id, chalk.bold("joined")));
             console.log(chalk.cyan("├─╴"), chalk.cyanBright("\ue0b6") +
                 chalk.bgCyanBright.black.bold(" starting Game ") +
@@ -32,6 +36,13 @@ io.on("connection", (socket) => {
                 chalk.green("\ue0b4"));
             console.log(chalk.cyan("├─╴"), chalk.blue.bold("selecting Map"), chalk.gray("skipping"));
             console.log(chalk.cyan("├─╴"), chalk.blue.bold("selecting Decks"), chalk.gray("skipping"));
+            console.log(chalk.cyan("├─╴"), chalk.blue.bold("dealing hands"), chalk.gray("skipping"));
+            currentGame.dealHand(playerEnum.player1);
+            currentGame.dealHand(playerEnum.player2);
+            console.log(chalk.cyan("├─╴"), chalk.blue.bold("player1 hand"), currentGame.gameCards.player1Hand);
+            console.log(chalk.cyan("├─╴"), chalk.blue.bold("player2 hand"), currentGame.gameCards.player2Hand);
+            io.to(currentGame.player1SocketID).emit('dealHand', { cards: currentGame.gameCards.player1Hand });
+            io.to(currentGame.player2SocketID).emit('dealHand', { cards: currentGame.gameCards.player2Hand });
             console.log(chalk.cyan("├─╴"), chalk.magenta("\ue0b6") +
                 chalk.bgMagenta.black.bold(" GameStart! ") +
                 chalk.magenta("\ue0b4"));

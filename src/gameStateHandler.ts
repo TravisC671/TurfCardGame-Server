@@ -67,8 +67,8 @@ export class gameStateHandler {
 			cardHand.push(selectedCard);
 		}
 
-
-		console.log(cardHand)
+		if (player == playerEnum.player1) this.gameCards.player1Hand = cardHand
+		if (player == playerEnum.player2) this.gameCards.player2Hand = cardHand
 	}
 
 	addPlayer(socketID: string) {
