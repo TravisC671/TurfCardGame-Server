@@ -146,12 +146,19 @@ io.on("connection", (socket) => {
 
 		if (currentGame.currentRound.player1 != undefined && currentGame.currentRound.player2 != undefined) {
 			console.log(chalk.cyan('│'))
+			currentGame.updateScores()
 			console.log(
 				chalk.cyan("├─╴"),
 				chalk.magenta("\ue0b6") +
+<<<<<<< Updated upstream
 				chalk.bgMagenta.black.bold(` revealing cards - score [placeholder] - [placehodler] rounds left []`) +
 				chalk.magenta("\ue0b4"),
+=======
+					chalk.bgMagenta.black.bold(` revealing cards - score ${currentGame.player1Score} - ${currentGame.player2Score} rounds left []`) +
+					chalk.magenta("\ue0b4"),
+>>>>>>> Stashed changes
 			);
+			
 
 			if (currentGame.player1SocketID == undefined) return
 			if (currentGame.player2SocketID == undefined) return
@@ -160,7 +167,8 @@ io.on("connection", (socket) => {
 			io.to(currentGame.player1SocketID).emit('sendPlay', currentGame.currentRound.player1)
 			io.to(currentGame.player2SocketID).emit('revealPlay', currentGame.currentRound.player1)
 			io.to(currentGame.player2SocketID).emit('sendPlay', currentGame.currentRound.player2)
-
+			io.to(currentGame.player1SocketID).emit('score', {player1: currentGame.player1Score, player2: currentGame.player2Score})
+			io.to(currentGame.player2SocketID).emit('score', {player1: currentGame.player1Score, player2: currentGame.player2Score})
 
 			currentGame.currentRound = {
 				player1: undefined,

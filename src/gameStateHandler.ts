@@ -1,7 +1,7 @@
 import { getRandom } from './libtools.js';
 
 
-import * as totalCards from './assets/cards.json';
+import * as totalCards from './assets/cards.json' assert { type: 'json' };
 
 export enum playerEnum {
 	player1,
@@ -33,6 +33,9 @@ export class gameStateHandler {
 	//add the type
 	currentRound: { player1: move | undefined; player2: move | undefined; };
 
+	player1Score: number;
+	player2Score: number;
+
 	constructor(gameID: string) {
 		this.isFull = false;
 		this.gameID = gameID;
@@ -47,6 +50,9 @@ export class gameStateHandler {
 			player2Hand: undefined,
 		}
 		this.gameState = []
+
+		this.player1Score = 0;
+		this.player2Score = 0;
 	}
 
 	joinGame(socketID: string) {
@@ -96,6 +102,20 @@ export class gameStateHandler {
 		else {
 			throw new Error('input enum is not player 1 or 2')
 		}
+	}
+
+	updateScores() {
+		if (this.currentRound.player1 == undefined) return
+		if (this.currentRound.player2 == undefined) return
+
+		let player1CardID = this.currentRound.player1.cardID
+		let player2CardID = this.currentRound.player2.cardID
+
+		//@ts-ignore
+		this.player1Score += totalCards.default.cards[player1CardID].cardCells
+		//@ts-ignore
+		this.player2Score += totalCards.default.cards[player2CardID].cardCells
+
 	}
 
 	chooseMap() { }
