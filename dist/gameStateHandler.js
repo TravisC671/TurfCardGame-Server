@@ -32,9 +32,9 @@ export class gameStateHandler {
         let cardHand = [];
         let isUnique = false;
         for (let i = 0; i < 4; i++) {
-            let selectedCard = getRandom(0, 15);
+            let selectedCard = getRandom(0, 14);
             while (cardHand.includes(selectedCard)) {
-                selectedCard = getRandom(0, 15);
+                selectedCard = getRandom(0, 14);
             }
             cardHand.push(selectedCard);
         }

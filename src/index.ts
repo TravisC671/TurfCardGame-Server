@@ -150,13 +150,8 @@ io.on("connection", (socket) => {
 			console.log(
 				chalk.cyan("├─╴"),
 				chalk.magenta("\ue0b6") +
-<<<<<<< Updated upstream
-				chalk.bgMagenta.black.bold(` revealing cards - score [placeholder] - [placehodler] rounds left []`) +
-				chalk.magenta("\ue0b4"),
-=======
 					chalk.bgMagenta.black.bold(` revealing cards - score ${currentGame.player1Score} - ${currentGame.player2Score} rounds left []`) +
 					chalk.magenta("\ue0b4"),
->>>>>>> Stashed changes
 			);
 			
 
