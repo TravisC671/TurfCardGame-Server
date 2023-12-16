@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
             console.log(chalk.cyan("├─╴"), chalk.blue.bold("player2 hand"), currentGame.gameCards.player2Hand);
             io.to(currentGame.player1SocketID).emit('dealHand', { cards: currentGame.gameCards.player1Hand });
             io.to(currentGame.player2SocketID).emit('dealHand', { cards: currentGame.gameCards.player2Hand });
+            currentGame.setupGame();
             console.log(chalk.cyan("├─╴"), chalk.magenta("\ue0b6") +
                 chalk.bgMagenta.black.bold(" GameStart! ") +
                 chalk.magenta("\ue0b4"));
@@ -81,7 +82,10 @@ io.on("connection", (socket) => {
         }
         if (currentGame.currentRound.player1 != undefined && currentGame.currentRound.player2 != undefined) {
             console.log(chalk.cyan('│'));
-            currentGame.updateScores();
+            let newcards = currentGame.updateState();
+            if (newcards == undefined)
+                return;
+            //currentGame.validatePlacement(cardPlayed)
             console.log(chalk.cyan("├─╴"), chalk.magenta("\ue0b6") +
                 chalk.bgMagenta.black.bold(` revealing cards - score ${currentGame.player1Score} - ${currentGame.player2Score} rounds left []`) +
                 chalk.magenta("\ue0b4"));
@@ -89,10 +93,13 @@ io.on("connection", (socket) => {
                 return;
             if (currentGame.player2SocketID == undefined)
                 return;
+            //TODO if they use an invalid card fit hits the shan, check if its in the hand
             io.to(currentGame.player1SocketID).emit('revealPlay', currentGame.currentRound.player2);
             io.to(currentGame.player1SocketID).emit('sendPlay', currentGame.currentRound.player1);
+            io.to(currentGame.player1SocketID).emit('sendNewCard', newcards.player1);
             io.to(currentGame.player2SocketID).emit('revealPlay', currentGame.currentRound.player1);
             io.to(currentGame.player2SocketID).emit('sendPlay', currentGame.currentRound.player2);
+            io.to(currentGame.player2SocketID).emit('sendNewCard', newcards.player2);
             io.to(currentGame.player1SocketID).emit('score', { player1: currentGame.player1Score, player2: currentGame.player2Score });
             io.to(currentGame.player2SocketID).emit('score', { player1: currentGame.player1Score, player2: currentGame.player2Score });
             currentGame.currentRound = {

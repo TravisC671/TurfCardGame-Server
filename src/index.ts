@@ -88,6 +88,8 @@ io.on("connection", (socket) => {
 			io.to(currentGame.player1SocketID).emit('dealHand', { cards: currentGame.gameCards.player1Hand })
 			io.to(currentGame.player2SocketID).emit('dealHand', { cards: currentGame.gameCards.player2Hand })
 
+			currentGame.setupGame();
+
 			console.log(
 				chalk.cyan("├─╴"),
 				chalk.magenta("\ue0b6") +
@@ -139,14 +141,18 @@ io.on("connection", (socket) => {
 			//TODO check valid placement
 			let cardPlayed = { cardID: cardID, rotation: rotation, positionX: positionX, positionY: positionY }
 
+			
 			if (player == playerEnum.player1) currentGame.currentRound.player1 = cardPlayed
 			if (player == playerEnum.player2) currentGame.currentRound.player2 = cardPlayed
-
+			
 		}
-
+		
 		if (currentGame.currentRound.player1 != undefined && currentGame.currentRound.player2 != undefined) {
 			console.log(chalk.cyan('│'))
-			currentGame.updateScores()
+			let newcards = currentGame.updateState()
+
+			if (newcards == undefined ) return
+			//currentGame.validatePlacement(cardPlayed)
 			console.log(
 				chalk.cyan("├─╴"),
 				chalk.magenta("\ue0b6") +
@@ -158,10 +164,17 @@ io.on("connection", (socket) => {
 			if (currentGame.player1SocketID == undefined) return
 			if (currentGame.player2SocketID == undefined) return
 
+			//TODO if they use an invalid card fit hits the shan, check if its in the hand
+
 			io.to(currentGame.player1SocketID).emit('revealPlay', currentGame.currentRound.player2)
 			io.to(currentGame.player1SocketID).emit('sendPlay', currentGame.currentRound.player1)
+			io.to(currentGame.player1SocketID).emit('sendNewCard', newcards.player1)
+
 			io.to(currentGame.player2SocketID).emit('revealPlay', currentGame.currentRound.player1)
 			io.to(currentGame.player2SocketID).emit('sendPlay', currentGame.currentRound.player2)
+			io.to(currentGame.player2SocketID).emit('sendNewCard', newcards.player2)
+
+
 			io.to(currentGame.player1SocketID).emit('score', {player1: currentGame.player1Score, player2: currentGame.player2Score})
 			io.to(currentGame.player2SocketID).emit('score', {player1: currentGame.player1Score, player2: currentGame.player2Score})
 
